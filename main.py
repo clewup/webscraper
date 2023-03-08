@@ -5,27 +5,43 @@ from bs4 import BeautifulSoup
 
 CHROME_DRIVER_PATH = 'c:/WebDrivers/chromedriver.exe'
 
-def get_data(url):
-    browser_options = Options()
+def get_data():
+    # Set up the webdriver
+    options = Options()
+    driver = webdriver.Chrome(options=options, executable_path=CHROME_DRIVER_PATH)
 
-    driver = webdriver.Chrome(options=browser_options, executable_path=CHROME_DRIVER_PATH)
-    driver.get(url)
+    # Fetch Indeed
+    driver.get("https://uk.indeed.com")
 
+    # Fetch 'Developer' listings in the UK
     whatInput = driver.find_element(By.ID, "text-input-what")
     whatInput.send_keys("Developer")
-
     whereInput = driver.find_element(By.ID, "text-input-where")
-    whereInput.send_keys("Leeds")
-
+    whereInput.send_keys("United Kingdom")
     findJobsButton = driver.find_element(By.CLASS_NAME, "yosegi-InlineWhatWhere-primaryButton")
     findJobsButton.click()
 
+    # Parse and print the results
     soup = BeautifulSoup(driver.page_source, "html.parser")
-
-    jobList = soup.find("ul", {"class": "jobsearch-ResultsList"})
-    jobListings = jobList.find_all('li')
+    listings = soup.find_all("table", {"class": "jobCard_mainContent"})
+    parse_data(listings)
 
     driver.quit()
 
+
+def parse_data(listings):
+    for listing in listings:
+        title = listing.find("a", {"role": "button"})
+        titleText = title.text
+
+        salary = listing.find("div", {"class": "salary-snippet-container"})
+        salaryText = "Not Stated"
+
+        if (salary):
+            salaryText = salary.text
+
+        print(titleText, " : ", salaryText)
+
+
 if __name__ == '__main__':
-    get_data("https://uk.indeed.com")
+    get_data()
