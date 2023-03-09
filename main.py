@@ -32,15 +32,17 @@ def get_data():
 def parse_data(listings):
     for listing in listings:
         title = listing.find("a", {"role": "button"})
-        titleText = title.text
+        title_text = title.text
 
         salary = listing.find("div", {"class": "salary-snippet-container"})
-        salaryText = "Not Stated"
+        salary_text = "Not Stated"
 
-        if (salary):
-            salaryText = salary.text
+        if salary:
+            salary_text = salary.text
 
-        print(titleText, " : ", salaryText)
+        f = open("salaryinfo.txt", "a+")
+        f.write("\n" + title_text + ": " + salary_text)
+        f.close()
 
 
 if __name__ == '__main__':
