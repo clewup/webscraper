@@ -35,7 +35,8 @@ def get_data(query):
         driver.get("https://www.amazon.co.uk" + product_link.get("href"))
 
         soup = BeautifulSoup(driver.page_source, "html.parser")
-        product_data = parse_data(soup)
+        url = driver.current_url
+        product_data = parse_data(soup, url)
         product_data_array.append(product_data)
 
     driver.quit()
@@ -45,16 +46,18 @@ def get_data(query):
 
 
 class Product(object):
-    def __init__(self, name, image, price):
+    def __init__(self, name, image, price, url):
         self.name = name
         self.image = image
         self.price = price
+        self.url = url
 
 
-def parse_data(soup: BeautifulSoup):
+def parse_data(soup: BeautifulSoup, url):
     # Parse key information
     product_name = soup.find("span", {"id": "productTitle"}).text
     product_image = soup.find("img", {"id": "landingImage"}).get("src")
+    product_url = url
 
     # Parse the price components and concatenate together
     product_price_symbol = soup.find("span", {"class": "a-price-symbol"}).text
@@ -66,7 +69,8 @@ def parse_data(soup: BeautifulSoup):
     return Product(
         name=product_name.strip(),
         image=product_image,
-        price=product_full_price)
+        price=product_full_price,
+        url=product_url)
 
 
 def save_data(query, products: []):
